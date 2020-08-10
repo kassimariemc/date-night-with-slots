@@ -13,7 +13,7 @@ A simple app that helps you enjoy a night at home with dinner and a movie, so yo
 
 ## Deployment
 
-[link to deployment](https://kassimariemc.github.io/project-1-operation-date-night/)
+[link to deployment](https://kassimariemc.github.io/date-night-with-slots/)
 
 
 ## Contributors
