@@ -1,0 +1,26 @@
+{
+  "name": "date-night-with-slots",
+  "version": "1.0.0",
+  "description": "curated dinner and a movie",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kassimariemc/date-night-with-slots.git"
+  },
+  "keywords": [
+    "dinner",
+    "movie"
+  ],
+  "author": "Kassi Stumb",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kassimariemc/date-night-with-slots/issues"
+  },
+  "homepage": "https://github.com/kassimariemc/date-night-with-slots#readme",
+  "dependencies": {
+    "jquery-slotmachine": "^4.0.1"
+  }
+}
