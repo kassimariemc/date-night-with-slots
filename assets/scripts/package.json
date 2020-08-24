@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/kassimariemc/date-night-with-slots#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "jquery-slotmachine": "^4.0.1"
   }
 }

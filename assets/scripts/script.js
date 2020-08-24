@@ -1,187 +1,13 @@
-
 $(document).ready(function () {
-
   //_________________________________________________________________
   //RESTAURANT GENERATOR
 
   // ______________________________________________________________
   // Variables for url for ajax call
-
   // API Key
   var authKey = "&key=AIzaSyAApQZVRRj-sNhF5LM9eZVQM8qOii5Orq4";
-
   // URL Base
   var queryURLBase = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/textsearch/json?query=";
-
-  // ______________________________________________________________
-  // Function to generate restaurants
-  function runQuery(rQueryURL) {
-
-    // Loading Animation
-    var loadingEl = $("<div>").attr("class", "loading-dots");
-    var loadingH1 = $("<h1>").text("Loading");
-    var loadingDot1 = $("<h1>").text(".").attr("class", "dot one");
-    var loadingDot2 = $("<h1>").text(".").attr("class", "dot two");
-    var loadingDot3 = $("<h1>").text(".").attr("class", "dot three");
-    $(".restaurant-row").prepend(loadingEl);
-    loadingEl.append(loadingH1, loadingDot1, loadingDot2, loadingDot3);
-
-
-    //AJAX Function to get restaurants
-    $.ajax({
-      url: rQueryURL,
-      method: "GET"
-    })
-      .then(function (placesData) {
-
-
-        var restIDS = [];
-        var restNames = [];
-        if (placesData.status == "ZERO_RESULTS") {
-          $(".restaurant-error-box").css("display", "block").text("Oops!  Please check above fields for spelling errors.")
-        }
-        else {
-
-          for (var i = 0; i < placesData.results.length; i++) {
-            if (placesData.results[i].business_status === "OPERATIONAL") {
-              restIDS.push(placesData.results[i].place_id);
-              restNames.push(placesData.results[i].name);
-            }
-          }
-
-          // var restNextPageURL = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/textsearch/json?pagetoken=" + placesData.next_page_token + authKey;
-          // setTimeout(() => {
-          //   $.ajax({
-          //     url: restNextPageURL,
-          //     method: "GET"
-          //   }).then(function (placesDataNextPage) {
-          //     for (var i = 0; i < placesDataNextPage.results.length; i++) {
-          //       if (placesDataNextPage.results[i].business_status === "OPERATIONAL") {
-          //         restIDS.push(placesDataNextPage.results[i].place_id);
-          //       }
-          //     }
-          //   })
-
-          // }, 1500);
-
-          createSlots(restNames, restIDS);
-        };
-      });
-  };
-
-  function createSlots(restaurantNames, restaurantIDS) {
-
-    // Slot Machine Elements
-    var slotRow = $("<div>").attr("class", "row slot-row").css("width", "100%");
-    $(".restaurant-row").append(slotRow);
-    for (var i = 0; i < 3; i++) {
-      var slotCols = $("<div>").attr("class", "col-lg-4");
-      slotRow.append(slotCols);
-      var slotDiv = $("<div>").attr("id", "machine" + i);
-      slotCols.append(slotDiv);
-
-      for (var j = 0; j < restaurantNames.length; j++) {
-        slotDiv.append($("<div>").html(restaurantNames[j]).attr("class", "slot-list"));
-      }
-    }
-    // Activate slot machines
-    // for (var i = 0; i < 3; i++) {
-      function onComplete(active) {
-        getRestaurantDetails(restaurantIDS[this.active]);
-      }
-
-      $('#machine0').slotMachine({
-        active: 1,
-        delay: 100
-      }).shuffle(5, onComplete);
-      
-      setTimeout(() => $('#machine1').slotMachine({
-        active: 2,
-        delay: 200
-      }).shuffle(7, onComplete), 750);
-
-      setTimeout(() => $('#machine2').slotMachine({
-        active: 3,
-        delay: 200
-      }).shuffle(9, onComplete), 1500);
-    // }
-  }
-
-  // ______________________________________________________________
-  //Function to Call for restaurant Details
-
-  function getRestaurantDetails(restaurant) {
-    $.ajax({
-      url: "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/details/json?place_id=" + restaurant + "&fields=name,photo,formatted_address,url,website,rating,formatted_phone_number,opening_hours" + authKey,
-      method: "GET"
-    }).then(function (placesData2) {
-
-      //Restaurant Name & Element
-      var restaurantName = placesData2.result.name;
-      var restaurantNameCard = $("<h4>").html(restaurantName).attr("class", "rest-title");
-
-      //Restaurant Photo & Element
-      var restaurantPhoto = $("<img>").attr("src", "https://maps.googleapis.com/maps/api/place/photo?photoreference=" + placesData2.result.photos[0].photo_reference + "&sensor=false&maxheight=200&maxwidth=200" + authKey).css("display", "block");
-
-      //Restaurant Address & Element
-      var restaurantAddress = placesData2.result.formatted_address;
-      var restaurantAddressCard = $("<p>").html(restaurantAddress).attr("class", "p-address");
-
-      //Restaurant GoogleMaps Link      
-      var restaurantMap = $("<a>").html("Google Maps").attr("href", placesData2.result.url).attr("target", "_blank").attr("class", "p-maps");
-
-      //Restaurant Number & Element
-      var restaurantPhone = placesData2.result.formatted_phone_number;
-      var restaurantPhoneCard = $("<p>").html(restaurantPhone).attr("class", "p-phone");
-
-      //Restaurant Rating & Element
-      var restaurantRating = placesData2.result.rating
-      var restaurantRatingCard = $("<p>").html("Rating: " + restaurantRating + "/5").attr("class", "p-address");
-
-      //Restaurant GoogleMaps Link & Element     
-      var restaurantMap = $("<a>").text("Google Maps").attr("href", placesData2.result.url).attr("target", "_blank");
-
-      //Restaurant Website Link & Element
-      var restaurantURL = $("<a>").text("Restaurant Website").attr("href", placesData2.result.website).attr("target", "_blank");
-
-      //Restaurant Cards & Elements
-      var restaurantRow = $(".restaurant-row");
-      var restaurantCol = $("<div>").attr("class", "col-lg-4 restaurant-col");
-      var restaurantCard = $("<div>").attr("class", "card restaurant-card");
-      var restaurantCardHeader = $("<div>").attr("class", "card-header restaurant-card-header");
-      var restaurantCardBody = $("<div>").attr("class", "card-body restaurant-card-body overflow-auto");
-
-      // Appending the restaurant cards above to the page
-      restaurantRow.append(restaurantCol.append(restaurantCard));
-      restaurantCard.append(restaurantCardHeader.append(restaurantNameCard));
-      restaurantCard.append(restaurantCardBody);
-      var restaurantRow1 = $("<div>").attr("class", "row justify-content-between");
-      restaurantCardBody.append(restaurantRow1);
-      var restaurantPhotoEl = $("<div>").addClass("class", "col-sm-5 offset-sm-2 col-md-6 offset-md-0");
-      var restaurantHoursEl = $("<div>").addClass("class", "col-sm-5 offset-sm-2 col-md-6 offset-md-0");
-      restaurantRow1.append(restaurantPhotoEl, restaurantHoursEl);
-      restaurantPhotoEl.append(restaurantPhoto);
-      
-      //Restaurant Hours      
-      if (placesData2.result.hasOwnProperty("opening_hours")) {
-        var restaurantHours = placesData2.result.opening_hours.weekday_text;
-        for (var i = 0; i < restaurantHours.length; i++) {
-          var restaurantHoursCard = $("<p>").html(restaurantHours[i]).attr("class", "rest-hours");
-          restaurantHoursEl.append(restaurantHoursCard);
-        }
-      };	
-      restaurantCardBody.append(restaurantPhoneCard, restaurantAddressCard, restaurantMap, restaurantRatingCard, restaurantURL);
-      
-      // Remove loading animation
-      $(".loading-dots").remove();
-      // Update button text
-      $("#rest-btn").text("Spin again!");
-      
-      var scrollBtnR = $(".scroll-btnR")
-      $(scrollBtnR).removeClass("hidden");
-    });
-  };
-
 
   // ______________________________________________________________
   // Main Function when the "Get Restaurant" button is clicked
@@ -235,6 +61,163 @@ $(document).ready(function () {
       runQuery(restURL);
     };
   });
+
+  // ______________________________________________________________
+  // Function to generate restaurants
+  async function runQuery(rQueryURL) {
+
+    // Loading Animation
+    var loadingEl = $("<div>").attr("class", "loading-dots");
+    var loadingH1 = $("<h1>").text("Loading");
+    var loadingDot1 = $("<h1>").text(".").attr("class", "dot one");
+    var loadingDot2 = $("<h1>").text(".").attr("class", "dot two");
+    var loadingDot3 = $("<h1>").text(".").attr("class", "dot three");
+    $(".restaurant-row").prepend(loadingEl);
+    loadingEl.append(loadingH1, loadingDot1, loadingDot2, loadingDot3);
+
+    try {
+      //AJAX Function to get restaurants
+      const placesData = await axios.get(rQueryURL);
+
+      var restIDS = [];
+      var restNames = [];
+      if (placesData.data.status == "ZERO_RESULTS") {
+        $(".restaurant-error-box").css("display", "block").text("Oops!  Please check above fields for spelling errors.")
+      }
+      else {
+        for (var i = 0; i < placesData.data.results.length; i++) {
+          if (placesData.data.results[i].business_status === "OPERATIONAL") {
+            restIDS.push(placesData.data.results[i].place_id);
+            restNames.push(placesData.data.results[i].name);
+          }
+        }
+
+        createSlots(restNames, restIDS);
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  };
+
+  // Slot machine function for restaurant names
+  function createSlots(restaurantNames, restaurantIDS) {
+
+    // Slot Machine Elements
+    var slotRow = $("<div>").attr("class", "row slot-row").css("width", "100%");
+    $(".restaurant-row").append(slotRow);
+    for (var i = 0; i < 3; i++) {
+      var slotCols = $("<div>").attr("class", "col-lg-4");
+      slotRow.append(slotCols);
+      var slotDiv = $("<div>").attr("id", "machine" + i);
+      slotCols.append(slotDiv);
+
+      for (var j = 0; j < restaurantNames.length; j++) {
+        slotDiv.append($("<div>").html(restaurantNames[j]).attr("class", "slot-list"));
+      }
+    }
+    // Activate slot machines
+    $('#machine0').slotMachine({
+      active: 1,
+      delay: 100
+    }).shuffle(5, onComplete);
+
+    setTimeout(() => $('#machine1').slotMachine({
+      active: 2,
+      delay: 200
+    }).shuffle(7, onComplete), 750);
+
+    setTimeout(() => $('#machine2').slotMachine({
+      active: 3,
+      delay: 200
+    }).shuffle(9, onComplete), 1500);
+
+    // Send active slot to get restaurant details
+    function onComplete(active) {
+      getRestaurantDetails(restaurantIDS[this.active]);
+    }
+  }
+
+  // ______________________________________________________________
+  //Function to Call for restaurant Details
+
+  async function getRestaurantDetails(restaurant) {
+    try {
+      const placesData2 = await axios.get("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/details/json?place_id=" + restaurant + "&fields=name,photo,formatted_address,url,website,rating,formatted_phone_number,opening_hours" + authKey);
+      // $.ajax({
+      //   url: "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/details/json?place_id=" + restaurant + "&fields=name,photo,formatted_address,url,website,rating,formatted_phone_number,opening_hours" + authKey,
+      //   method: "GET"
+      // }).then(function (placesData2) {
+      console.log(placesData2);
+
+      //Restaurant Name & Element
+      var restaurantName = placesData2.data.result.name;
+      var restaurantNameCard = $("<h4>").html(restaurantName).attr("class", "rest-title");
+
+      //Restaurant Photo & Element
+      var restaurantPhoto = $("<img>").attr("src", "https://maps.googleapis.com/maps/api/place/photo?photoreference=" + placesData2.data.result.photos[0].photo_reference + "&sensor=false&maxheight=200&maxwidth=200" + authKey).css("display", "block");
+
+      //Restaurant Address & Element
+      var restaurantAddress = placesData2.data.result.formatted_address;
+      var restaurantAddressCard = $("<p>").html(restaurantAddress).attr("class", "p-address");
+
+      //Restaurant GoogleMaps Link      
+      var restaurantMap = $("<a>").html("Google Maps").attr("href", placesData2.data.result.url).attr("target", "_blank").attr("class", "p-maps");
+
+      //Restaurant Number & Element
+      var restaurantPhone = placesData2.data.result.formatted_phone_number;
+      var restaurantPhoneCard = $("<p>").html(restaurantPhone).attr("class", "p-phone");
+
+      //Restaurant Rating & Element
+      var restaurantRating = placesData2.data.result.rating
+      var restaurantRatingCard = $("<p>").html("Rating: " + restaurantRating + "/5").attr("class", "p-address");
+
+      //Restaurant GoogleMaps Link & Element     
+      var restaurantMap = $("<a>").text("Google Maps").attr("href", placesData2.data.result.url).attr("target", "_blank");
+
+      //Restaurant Website Link & Element
+      var restaurantURL = $("<a>").text("Restaurant Website").attr("href", placesData2.data.result.website).attr("target", "_blank");
+
+      //Restaurant Cards & Elements
+      var restaurantRow = $(".restaurant-row");
+      var restaurantCol = $("<div>").attr("class", "col-lg-4 restaurant-col");
+      var restaurantCard = $("<div>").attr("class", "card restaurant-card");
+      var restaurantCardHeader = $("<div>").attr("class", "card-header restaurant-card-header");
+      var restaurantCardBody = $("<div>").attr("class", "card-body restaurant-card-body overflow-auto");
+
+      // Appending the restaurant cards above to the page
+      restaurantRow.append(restaurantCol.append(restaurantCard));
+      restaurantCard.append(restaurantCardHeader.append(restaurantNameCard));
+      restaurantCard.append(restaurantCardBody);
+      var restaurantRow1 = $("<div>").attr("class", "row justify-content-between");
+      restaurantCardBody.append(restaurantRow1);
+      var restaurantPhotoEl = $("<div>").addClass("class", "col-sm-5 offset-sm-2 col-md-6 offset-md-0");
+      var restaurantHoursEl = $("<div>").addClass("class", "col-sm-5 offset-sm-2 col-md-6 offset-md-0");
+      restaurantRow1.append(restaurantPhotoEl, restaurantHoursEl);
+      restaurantPhotoEl.append(restaurantPhoto);
+
+      //Restaurant Hours      
+      if (placesData2.data.result.hasOwnProperty("opening_hours")) {
+        var restaurantHours = placesData2.data.result.opening_hours.weekday_text;
+        for (var i = 0; i < restaurantHours.length; i++) {
+          var restaurantHoursCard = $("<p>").html(restaurantHours[i]).attr("class", "rest-hours");
+          restaurantHoursEl.append(restaurantHoursCard);
+        }
+      };
+      restaurantCardBody.append(restaurantPhoneCard, restaurantAddressCard, restaurantMap, restaurantRatingCard, restaurantURL);
+
+      // Remove loading animation
+      $(".loading-dots").remove();
+      // Update button text
+      $("#rest-btn").text("Spin again!");
+
+      var scrollBtnR = $(".scroll-btnR")
+      $(scrollBtnR).removeClass("hidden");
+      // });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
 
   // ______________________________________________________________
   //MOVIE GENERATOR
